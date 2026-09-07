@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบขายสินค้า & Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Sarabun', sans-serif; }
+        .product-img-main { width: 100%; max-height: 380px; object-fit: contain; cursor: pointer; border-radius: 8px; }
+        .thumb-img { width: 65px; height: 65px; object-fit: cover; cursor: pointer; border: 2px solid #ddd; border-radius: 6px; }
+        .thumb-img.active { border-color: #0d6efd; }
+        .hp-field { display: none !important; visibility: hidden !important; }
+    </style>
+</head>
+<body>
+
+<div class="container py-4">
+
+    <!-- 1. Form Login -->
+    <div id="loginSection" class="row justify-content-center my-5">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="m-0">🔑 เข้าสู่ระบบร้านค้า</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" id="loginUser" class="form-control" value="admin" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" id="loginPass" class="form-control" value="1234" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">เข้าสู่ระบบ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Main System Page -->
+    <div id="mainSection" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
+            <h4 class="m-0">ยินดีต้อนรับ: <span id="userDisplayName" class="text-primary fw-bold"></span></h4>
+            <button class="btn btn-outline-danger btn-sm" onclick="logout()">ออกจากระบบ</button>
+        </div>
+
+        <ul class="nav nav-pills mb-4 justify-content-center" id="mainTab">
+            <li class="nav-item">
+                <button class="nav-link active fw-bold px-4" id="shop-tab" data-bs-toggle="pill" data-bs-target="#shop">🛍️ หน้าร้านค้า</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link fw-bold px-4" id="dash-tab" data-bs-toggle="pill" data-bs-target="#dashboard" onclick="fetchDashboardData()">📊 Dashboard & สรุปยอดขาย</button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- TAB 1: หน้าร้านค้า -->
+            <div class="tab-pane fade show active" id="shop">
+                <div class="card shadow-sm border-0 p-4">
+                    <div class="row">
+                        <div class="col-md-6 text-center">
+                            <img id="mainImg" src="https://picsum.photos/id/1062/600/600" class="product-img-main border mb-3" onclick="openModal(currentImgIdx)">
+                            <p class="text-muted small">💡 คลิกที่รูปเพื่อขยายใหญ่ (มีทั้งหมด 6 มุมมอง)</p>
+                            <div class="d-flex justify-content-center gap-2 flex-wrap" id="thumbBox"></div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <span class="badge bg-secondary mb-2">รหัสสินค้า: A109</span>
+                            <h3>บอร์ด LilyPad Arduino Compatible</h3>
+                            <p class="text-muted">หมวดหมู่: ราย Arduino Board (Arduino Compatible)</p>
+                            <hr>
+                            <div class="mb-3">
+                                <span class="text-decoration-line-through text-muted">ราคาปกติ 160.00 บาท</span>
+                                <h3 class="text-danger fw-bold">ลดเหลือ <span id="unitPrice">100.00</span> บาท</h3>
+                            </div>
+                            <p class="text-success fw-bold">สถานะสินค้า: พร้อมส่ง</p>
+                            
+                            <form id="orderForm" onsubmit="submitOrder(event)">
+                                <!-- Honeypot Field ป้องกัน Spam -->
+                                <div class="hp-field">
+                                    <input type="text" id="website_hp" name="website_hp" tabindex="-1" autocomplete="off">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">จำนวนสินค้า:</label>
+                                    <input type="number" id="qtyInput" class="form-control w-50" value="1" min="1" oninput="calculateTotal()">
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <h5 class="m-0">ราคารวมทั้งสิ้น: <b class="text-primary" id="totalPriceText">100.00</b> บาท</h5>
+                                </div>
+
+                                <button type="submit" class="btn btn-dark btn-lg w-100">หยิบลงตะกร้า / บันทึกการสั่งซื้อ</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: Dashboard -->
+            <div class="tab-pane fade" id="dashboard">
+                <div class="card shadow-sm border-0 p-3 mb-4">
+                    <h5 class="fw-bold">📊 กราฟเปรียบเทียบยอดขายรายวัน (จำนวนชิ้น vs ราคารวม)</h5>
+                    <canvas id="salesChart" height="100"></canvas>
+                </div>
+
+                <div class="card shadow-sm border-0 p-3">
+                    <h5 class="fw-bold mb-3">📋 รายการสั่งซื้อทั้งหมด</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>วันเวลาที่สั่งสินค้า</th>
+                                    <th>จำนวน (ชิ้น)</th>
+                                    <th>ราคารวม (บาท)</th>
+                                    <th>ผู้สั่งซื้อ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span id="pageInfo" class="text-muted"></span>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="prevPage()">ก่อนหน้า</button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="nextPage()">ถัดไป</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="imgModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body text-center">
+                <img id="modalPreviewImg" src="" class="img-fluid rounded mb-3" style="max-height: 70vh;">
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-outline-dark" onclick="navModalImg(-1)">❮ รูปก่อนหน้า</button>
+                    <button class="btn btn-outline-dark" onclick="navModalImg(1)">รูปถัดไป ❯</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// *** GAS Web App URL ***
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwCvz-4mmHAJx2NqmDH57GcpKbRIT33qFs-zYjd4EeHXKLQ2f6sb_wCDpEZetsqPPP1/exec";
+
+const unitPrice = 100.00;
+let currentUser = null;
+let currentImgIdx = 0;
+
+const galleryImages = [
+    "https://picsum.photos/id/1062/600/600",
+    "https://picsum.photos/id/1060/600/600",
+    "https://picsum.photos/id/1010/600/600",
+    "https://picsum.photos/id/96/600/600",
+    "https://picsum.photos/id/201/600/600",
+    "https://picsum.photos/id/250/600/600"
+];
+
+const thumbBox = document.getElementById('thumbBox');
+galleryImages.forEach((url, i) => {
+    const img = document.createElement('img');
+    img.src = url;
+    img.className = `thumb-img ${i === 0 ? 'active' : ''}`;
+    img.onclick = () => setMainImage(i);
+    thumbBox.appendChild(img);
+});
+
+function setMainImage(i) {
+    currentImgIdx = i;
+    document.getElementById('mainImg').src = galleryImages[i];
+    document.querySelectorAll('.thumb-img').forEach((el, idx) => {
+        el.classList.toggle('active', idx === i);
+    });
+}
+
+function openModal(i) {
+    setMainImage(i);
+    document.getElementById('modalPreviewImg').src = galleryImages[currentImgIdx];
+    new bootstrap.Modal(document.getElementById('imgModal')).show();
+}
+
+function navModalImg(dir) {
+    currentImgIdx = (currentImgIdx + dir + galleryImages.length) % galleryImages.length;
+    setMainImage(currentImgIdx);
+    document.getElementById('modalPreviewImg').src = galleryImages[currentImgIdx];
+}
+
+function calculateTotal() {
+    const qty = Math.max(1, parseInt(document.getElementById('qtyInput').value) || 1);
+    document.getElementById('totalPriceText').innerText = (qty * unitPrice).toFixed(2);
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('loginUser').value;
+    const password = document.getElementById('loginPass').value;
+
+    const res = await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'login', username, password })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+        currentUser = data.user;
+        document.getElementById('userDisplayName').innerText = currentUser.name;
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('mainSection').style.display = 'block';
+    } else {
+        alert(data.message);
+    }
+});
+
+function logout() { location.reload(); }
+
+async function submitOrder(e) {
+    e.preventDefault();
+    const qty = parseInt(document.getElementById('qtyInput').value) || 1;
+    const total = qty * unitPrice;
+    const hpValue = document.getElementById('website_hp').value;
+
+    const payload = {
+        action: 'addOrder',
+        quantity: qty,
+        totalPrice: total,
+        username: currentUser ? currentUser.username : 'Guest',
+        website: hpValue
+    };
+
+    const res = await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+
+    if (result.success) {
+        alert("บันทึกการสั่งซื้อเรียบร้อยแล้ว!");
+        document.getElementById('qtyInput').value = 1;
+        calculateTotal();
+    } else {
+        alert("เกิดข้อผิดพลาด: " + result.message);
+    }
+}
+
+let rawOrders = [];
+let currentPage = 1;
+const rowsPerPage = 5;
+let chartInstance = null;
+
+async function fetchDashboardData() {
+    const res = await fetch(GAS_URL + "?action=getOrders");
+    const result = await res.json();
+    if (result.success) {
+        rawOrders = result.data;
+        renderChart();
+        renderTable();
+    }
+}
+
+function renderChart() {
+    const dailyQty = {}, dailyRevenue = {};
+    rawOrders.forEach(o => {
+        const date = o.timestamp.split(' ')[0] || o.timestamp;
+        dailyQty[date] = (dailyQty[date] || 0) + o.quantity;
+        dailyRevenue[date] = (dailyRevenue[date] || 0) + o.totalPrice;
+    });
+
+    const labels = Object.keys(dailyQty);
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'จำนวนสินค้าที่ขายได้ (ชิ้น)', data: Object.values(dailyQty), backgroundColor: '#0d6efd', yAxisID: 'y' },
+                { label: 'ยอดขายรวม (บาท)', data: Object.values(dailyRevenue), backgroundColor: '#198754', yAxisID: 'y1' }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { type: 'linear', position: 'left', title: { display: true, text: 'จำนวน (ชิ้น)' } },
+                y1: { type: 'linear', position: 'right', title: { display: true, text: 'ราคารวม (บาท)' }, grid: { drawOnChartArea: false } }
+            }
+        }
+    });
+}
+
+function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const pageData = rawOrders.slice(start, start + rowsPerPage);
+
+    pageData.forEach(row => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${row.id}</td>
+                <td>${row.timestamp}</td>
+                <td>${row.quantity}</td>
+                <td>${row.totalPrice.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</td>
+                <td>${row.username}</td>
+            </tr>`;
+    });
+
+    const totalPages = Math.ceil(rawOrders.length / rowsPerPage) || 1;
+    document.getElementById('pageInfo').innerText = `หน้า ${currentPage} จาก ${totalPages} (ทั้งหมด ${rawOrders.length} รายการ)`;
+}
+
+function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
+function nextPage() { if (currentPage < Math.ceil(rawOrders.length / rowsPerPage)) { currentPage++; renderTable(); } }
+</script>
+</body>
+</html>
