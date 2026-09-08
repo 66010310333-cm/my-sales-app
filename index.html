@@ -67,11 +67,10 @@
                 <div class="lg:col-span-6 space-y-4">
                     <div class="relative bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 aspect-square flex items-center justify-center group">
                         <img id="mainImage" 
-                             src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80" 
-                             alt="บอร์ด Microcontroller" 
-                             referrerpolicy="no-referrer"
-                             class="w-full h-full object-cover p-2 transition-transform duration-500 group-hover:scale-105"
-                             onerror="handleImgError(this)">
+                             <img id="mainImage" 
+     src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f8fafc'/><circle cx='200' cy='200' r='150' fill='%236b21a8'/><circle cx='200' cy='200' r='130' fill='none' stroke='%23a855f7' stroke-width='2' stroke-dasharray='6 6'/><g fill='%23eab308'><circle cx='200' cy='60' r='12'/><circle cx='299' cy='86' r='12'/><circle cx='340' cy='185' r='12'/><circle cx='314' cy='284' r='12'/><circle cx='225' cy='338' r='12'/><circle cx='126' cy='314' r='12'/><circle cx='60' cy='225' r='12'/><circle cx='86' cy='126' r='12'/></g><g fill='%23f8fafc'><circle cx='200' cy='60' r='5'/><circle cx='299' cy='86' r='5'/><circle cx='340' cy='185' r='5'/><circle cx='314' cy='284' r='5'/><circle cx='225' cy='338' r='5'/><circle cx='126' cy='314' r='5'/><circle cx='60' cy='225' r='5'/><circle cx='86' cy='126' r='5'/></g><rect x='160' y='160' width='80' height='80' rx='6' fill='%231e293b'/><text x='200' y='135' text-anchor='middle' fill='%23ffffff' font-family='sans-serif' font-weight='bold' font-size='18'>LilyPad</text><text x='200' y='270' text-anchor='middle' fill='%23d8b4fe' font-family='sans-serif' font-size='12'>Arduino 328</text></svg>" 
+     alt="LilyPad Board" 
+     class="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105">
                         
                         <span class="absolute top-4 left-4 bg-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
                             <i class="fa-solid fa-check mr-1"></i> สินค้าพร้อมส่ง
@@ -230,15 +229,11 @@
     <!-- JavaScript Application Logic -->
     <script>
         // ใช้ชุดรูปถ่ายอิเล็กทรอนิกส์/บอร์ดวงจรจริงความละเอียดสูงที่ไม่โดนบล็อก CORS แน่นอน 100%
-        const productImages = [
-            "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1608564697071-ddf911d81370?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80"
-        ];
-
+       const productImages = [
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f8fafc'/><circle cx='200' cy='200' r='150' fill='%236b21a8'/><circle cx='200' cy='200' r='130' fill='none' stroke='%23a855f7' stroke-width='2' stroke-dasharray='6 6'/><g fill='%23eab308'><circle cx='200' cy='60' r='12'/><circle cx='299' cy='86' r='12'/><circle cx='340' cy='185' r='12'/><circle cx='314' cy='284' r='12'/><circle cx='225' cy='338' r='12'/><circle cx='126' cy='314' r='12'/><circle cx='60' cy='225' r='12'/><circle cx='86' cy='126' r='12'/></g><g fill='%23f8fafc'><circle cx='200' cy='60' r='5'/><circle cx='299' cy='86' r='5'/><circle cx='340' cy='185' r='5'/><circle cx='314' cy='284' r='5'/><circle cx='225' cy='338' r='5'/><circle cx='126' cy='314' r='5'/><circle cx='60' cy='225' r='5'/><circle cx='86' cy='126' r='5'/></g><rect x='160' y='160' width='80' height='80' rx='6' fill='%231e293b'/><text x='200' y='135' text-anchor='middle' fill='%23ffffff' font-family='sans-serif' font-weight='bold' font-size='18'>LilyPad</text><text x='200' y='270' text-anchor='middle' fill='%23d8b4fe' font-family='sans-serif' font-size='12'>Arduino 328</text></svg>",
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f8fafc'/><circle cx='200' cy='200' r='150' fill='%23581c87'/><circle cx='200' cy='200' r='130' fill='none' stroke='%23c084fc' stroke-width='2'/><rect x='150' y='150' width='100' height='100' rx='10' fill='%230f172a'/><text x='200' y='205' text-anchor='middle' fill='%23ffffff' font-family='sans-serif' font-weight='bold' font-size='16'>ATmega328P</text></svg>",
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f8fafc'/><circle cx='200' cy='200' r='150' fill='%237e22ce'/><text x='200' y='190' text-anchor='middle' fill='%23ffffff' font-family='sans-serif' font-weight='bold' font-size='22'>Wearable</text><text x='200' y='220' text-anchor='middle' fill='%23e9d5ff' font-family='sans-serif' font-size='14'>Electronics</text></svg>"
+];
         const UNIT_PRICE = 135.00;
         const INITIAL_STOCK = 20;
 
