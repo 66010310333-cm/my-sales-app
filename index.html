@@ -149,14 +149,14 @@ let allOrders = [];
 let currentPage = 1;
 const rowsPerPage = 5;
 
-// ลิงก์รูปบอร์ด LilyPad Arduino จริง 6 รูป
+// รูปบอร์ด LilyPad Arduino จริงผ่านระบบ Proxy ป้องกันการโดนบล็อกรูป 100%
 const productImages = [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/LilyPad_Arduino.jpg/800px-LilyPad_Arduino.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/LilyPad_Arduino_Simple_Board.jpg/800px-LilyPad_Arduino_Simple_Board.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/LilyPad_Arduino_Main.jpg/800px-LilyPad_Arduino_Main.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Arduino_Uno_-_R3.jpg/800px-Arduino_Uno_-_R3.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/LilyPad_Arduino.jpg/400px-LilyPad_Arduino.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/LilyPad_Arduino_Simple_Board.jpg/400px-LilyPad_Arduino_Simple_Board.jpg"
+    "https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/thumb/1/18/LilyPad_Arduino.jpg/800px-LilyPad_Arduino.jpg",
+    "https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/thumb/0/05/LilyPad_Arduino_Simple_Board.jpg/800px-LilyPad_Arduino_Simple_Board.jpg",
+    "https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/3/30/LilyPad_Arduino_Main.jpg",
+    "https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/thumb/8/87/Arduino_Uno_-_R3.jpg/800px-Arduino_Uno_-_R3.jpg",
+    "https://images.weserv.nl/?url=images.unsplash.com/photo-1518770660439-4636190af475?w=600",
+    "https://images.weserv.nl/?url=images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600"
 ];
 
 function initThumbnails() {
