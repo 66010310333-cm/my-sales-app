@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบขายสินค้า & Dashboard</title>
+    <!-- แท็กแก้ปัญหารูปภาพไม่แสดงจากการโดนบล็อก Hotlink -->
+    <meta name="referrer" content="no-referrer">
+    <title>ระบบขายสินค้า & Dashboard (LilyPad Arduino)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { background-color: #f4f6f9; font-family: 'Sarabun', sans-serif; }
-        .product-img-main { width: 100%; max-height: 380px; object-fit: contain; cursor: pointer; border-radius: 8px; }
+        .product-img-main { width: 100%; max-height: 380px; object-fit: contain; border-radius: 8px; }
         .thumb-img { width: 65px; height: 65px; object-fit: cover; cursor: pointer; border: 2px solid #ddd; border-radius: 6px; }
-        .thumb-img.active { border-color: #0d6efd; }
+        .thumb-img.active { border-color: #0d6efd; border-width: 3px; }
         .hp-field { display: none !important; visibility: hidden !important; }
     </style>
 </head>
@@ -64,18 +66,18 @@
                 <div class="card shadow-sm border-0 p-4">
                     <div class="row">
                         <div class="col-md-6 text-center">
-                            <img id="mainImg" src="" alt="บอร์ด LilyPad" class="product-img-main border mb-3">
+                            <img id="mainImg" src="" alt="บอร์ด LilyPad" class="product-img-main border mb-3 p-2">
                             <div class="d-flex justify-content-center gap-2 flex-wrap" id="thumbBox"></div>
                         </div>
 
                         <div class="col-md-6">
                             <span class="badge bg-secondary mb-2">รหัสสินค้า: A109</span>
-                            <h3>บอร์ด LilyPad Arduino Compatible</h3>
-                            <p class="text-muted">หมวดหมู่: ราย Arduino Board</p>
+                            <h3 class="fw-bold">บอร์ด LilyPad 328 ATmega328 Main Board (Arduino-Compatible)</h3>
+                            <p class="text-muted">หมวดหมู่: ขาย Arduino Board (Arduino Compatible)</p>
                             <hr>
                             <div class="mb-3">
-                                <span class="text-decoration-line-through text-muted">ราคาปกติ 160.00 บาท</span>
-                                <h3 class="text-danger fw-bold">ลดเหลือ <span id="unitPrice">100.00</span> บาท</h3>
+                                <span class="text-decoration-line-through text-muted">ราคาปกติ 300.00 บาท</span>
+                                <h3 class="text-danger fw-bold">ลดเหลือ <span id="unitPrice">135.00</span> บาท</h3>
                             </div>
                             <p class="text-success fw-bold">สถานะสินค้า: พร้อมส่ง</p>
                             
@@ -90,7 +92,7 @@
                                 </div>
 
                                 <div class="alert alert-info">
-                                    <h5 class="m-0">ราคารวมทั้งสิ้น: <b class="text-primary" id="totalPriceText">100.00</b> บาท</h5>
+                                    <h5 class="m-0">ราคารวมทั้งสิ้น: <b class="text-primary" id="totalPriceText">135.00</b> บาท</h5>
                                 </div>
 
                                 <button type="submit" id="btnSubmitOrder" class="btn btn-dark btn-lg w-100">หยิบลงตะกร้า / บันทึกการสั่งซื้อ</button>
@@ -123,6 +125,12 @@
                             <tbody id="tableBody"></tbody>
                         </table>
                     </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <button class="btn btn-outline-primary btn-sm" id="btnPrev" onclick="changePage(-1)">⬅️ ย้อนกลับ</button>
+                        <span id="pageInfo" class="fw-bold text-muted">หน้าที่ 1</span>
+                        <button class="btn btn-outline-primary btn-sm" id="btnNext" onclick="changePage(1)">ถัดไป ➡️</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -131,21 +139,24 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// *** วาง Web App URL จาก Google Apps Script ตรงนี้ ***
-const GAS_URL = "https://script.google.com/macros/s/AKfycbya7R2avmloPnjq5oEkSsiS3XSCaydq1ZzrOGm74i-1fjafyH9QTmPEDYh7tQO418ow/exec"; 
+// *** อย่าลืมนำ Web App URL ของคุณมาวางแทนที่บรรทัดนี้ ***
+const GAS_URL = "วาง_WEB_APP_URL_ที่นี่"; 
 
-const unitPrice = 100.00;
+const unitPrice = 135.00;
 let currentUser = null;
 let chartInstance = null;
+let allOrders = [];
+let currentPage = 1;
+const rowsPerPage = 5;
 
-// รูปบอร์ด LilyPad Arduino จริงหลากหลายมุมมอง (6 รูป)
+// ลิงก์รูปบอร์ด LilyPad Arduino จริง 6 รูป
 const productImages = [
     "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/LilyPad_Arduino.jpg/800px-LilyPad_Arduino.jpg",
     "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/LilyPad_Arduino_Simple_Board.jpg/800px-LilyPad_Arduino_Simple_Board.jpg",
     "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/LilyPad_Arduino_Main.jpg/800px-LilyPad_Arduino_Main.jpg",
     "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Arduino_Uno_-_R3.jpg/800px-Arduino_Uno_-_R3.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/LilyPad_Arduino.jpg/500px-LilyPad_Arduino.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/LilyPad_Arduino_Simple_Board.jpg/500px-LilyPad_Arduino_Simple_Board.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/LilyPad_Arduino.jpg/400px-LilyPad_Arduino.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/LilyPad_Arduino_Simple_Board.jpg/400px-LilyPad_Arduino_Simple_Board.jpg"
 ];
 
 function initThumbnails() {
@@ -266,8 +277,10 @@ async function fetchDashboardData() {
         const url = `${GAS_URL}?action=getOrders`;
         const result = await jsonpRequest(url);
         if (result.success) {
+            allOrders = result.data.reverse();
             renderChart(result.data);
-            renderTable(result.data);
+            currentPage = 1;
+            renderTableWithPagination();
         }
     } catch (err) {
         console.error("Dashboard Fetch Error:", err);
@@ -283,10 +296,7 @@ function renderChart(rawOrders) {
     });
 
     const ctx = document.getElementById('salesChart').getContext('2d');
-    
-    if (chartInstance) {
-        chartInstance.destroy();
-    }
+    if (chartInstance) chartInstance.destroy();
 
     chartInstance = new Chart(ctx, {
         type: 'bar',
@@ -300,19 +310,38 @@ function renderChart(rawOrders) {
     });
 }
 
-function renderTable(rawOrders) {
+function renderTableWithPagination() {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
-    rawOrders.forEach(row => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${row.id}</td>
-                <td>${row.timestamp}</td>
-                <td>${row.quantity}</td>
-                <td>${Number(row.totalPrice).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</td>
-                <td>${row.username}</td>
-            </tr>`;
-    });
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageOrders = allOrders.slice(start, end);
+
+    if (pageOrders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">ยังไม่มีข้อมูลการสั่งซื้อ</td></tr>`;
+    } else {
+        pageOrders.forEach(row => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${row.id}</td>
+                    <td>${row.timestamp}</td>
+                    <td>${row.quantity}</td>
+                    <td>${Number(row.totalPrice).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</td>
+                    <td>${row.username}</td>
+                </tr>`;
+        });
+    }
+
+    const totalPages = Math.ceil(allOrders.length / rowsPerPage) || 1;
+    document.getElementById('pageInfo').innerText = `หน้าที่ ${currentPage} / ${totalPages}`;
+    document.getElementById('btnPrev').disabled = (currentPage === 1);
+    document.getElementById('btnNext').disabled = (currentPage >= totalPages);
+}
+
+function changePage(direction) {
+    currentPage += direction;
+    renderTableWithPagination();
 }
 </script>
 </body>
