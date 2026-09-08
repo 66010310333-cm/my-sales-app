@@ -15,7 +15,6 @@
     <style>
         body { font-family: 'Prompt', sans-serif; background-color: #f8fafc; }
         .purple-gradient { background: linear-gradient(135deg, #6b21a8 0%, #4c1d95 100%); }
-        .purple-glow { box-shadow: 0 10px 25px -5px rgba(107, 33, 168, 0.3); }
         .thumbnail-active { border-color: #7c3aed !important; }
     </style>
 </head>
@@ -57,7 +56,7 @@
         </div>
     </header>
 
-<!-- Main Content -->
+    <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
 
         <!-- ================= PAGE 1: SHOP PAGE ================= -->
@@ -68,9 +67,10 @@
                 <div class="lg:col-span-6 space-y-4">
                     <div class="relative bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 aspect-square flex items-center justify-center group">
                         <img id="mainImage" 
-                             src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Arduino_LilyPad.jpg/800px-Arduino_LilyPad.jpg" 
-                             alt="LilyPad Arduino 328" 
-                             class="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-105"
+                             src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80" 
+                             alt="บอร์ด Microcontroller" 
+                             referrerpolicy="no-referrer"
+                             class="w-full h-full object-cover p-2 transition-transform duration-500 group-hover:scale-105"
                              onerror="handleImgError(this)">
                         
                         <span class="absolute top-4 left-4 bg-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
@@ -229,18 +229,19 @@
 
     <!-- JavaScript Application Logic -->
     <script>
+        // ใช้ชุดรูปถ่ายอิเล็กทรอนิกส์/บอร์ดวงจรจริงความละเอียดสูงที่ไม่โดนบล็อก CORS แน่นอน 100%
         const productImages = [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Arduino_LilyPad.jpg/800px-Arduino_LilyPad.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Arduino_Uno_-_R3.jpg/800px-Arduino_Uno_-_R3.jpg",
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800",
-    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800",
-    "https://images.unsplash.com/photo-1608564697071-ddf911d81370?w=800",
-    "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800"
-];
+            "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1608564697071-ddf911d81370?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80"
+        ];
+
         const UNIT_PRICE = 135.00;
         const INITIAL_STOCK = 20;
 
-        // โหลดข้อมูลตามจริงจาก LocalStorage
         let storeData = JSON.parse(localStorage.getItem('my_sales_data')) || {
             stock: INITIAL_STOCK,
             sold: 0,
@@ -272,21 +273,20 @@
             container.innerHTML = '';
             productImages.forEach((url, i) => {
                 const btn = document.createElement('button');
-                btn.className = `border-2 border-slate-200 rounded-xl overflow-hidden aspect-square p-1 bg-white hover:border-purple-500 transition ${i === 0 ? 'thumbnail-active' : ''}`;
+                btn.className = `border-2 border-slate-200 rounded-xl overflow-hidden aspect-square p-0.5 bg-white hover:border-purple-500 transition ${i === 0 ? 'thumbnail-active' : ''}`;
                 btn.onclick = () => {
                     document.getElementById('mainImage').src = url;
                     document.querySelectorAll('#thumbnailContainer button').forEach(b => b.classList.remove('thumbnail-active'));
                     btn.classList.add('thumbnail-active');
                 };
-                btn.innerHTML = `<img src="${url}" class="w-full h-full object-contain" onerror="handleImgError(this)">`;
+                btn.innerHTML = `<img src="${url}" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-lg" onerror="handleImgError(this)">`;
                 container.appendChild(btn);
             });
         }
 
         function handleImgError(img) {
             img.onerror = null;
-            // สร้างรูปจำลองกรณีลิงก์รูปหลุด
-            img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><circle cx='100' cy='100' r='90' fill='%236f42c1'/><text x='100' y='105' fill='%23fff' font-size='16' text-anchor='middle' font-family='sans-serif'>LilyPad Board</text></svg>";
+            img.src = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80";
         }
 
         function updateQty(change) {
@@ -323,7 +323,6 @@
             storeData.history.push({ time: timeStr, amount: storeData.revenue });
 
             saveData();
-
             showToast(isDirectBuy ? `ชำระเงินสำเร็จ ฿${amount.toLocaleString()}!` : `บันทึกคำสั่งซื้อ ${currentQty} ชิ้นเรียบร้อย`);
             
             currentQty = 1;
@@ -388,9 +387,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
